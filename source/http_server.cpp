@@ -27,8 +27,6 @@ ClientConnection::ClientConnection(TCPSocket* socket, Callback<void(ParsedHttpRe
 };
 
 ClientConnection::~ClientConnection() {
-    printf("deleting ClientConnection\n");
-    fflush(stdout);
     _handler = nullptr;
 };
 

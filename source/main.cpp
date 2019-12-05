@@ -78,6 +78,7 @@ Thread msgSender(osPriorityNormal, DEFAULT_STACK_SIZE * 3);
 // Requests come in here
 void request_handler(ParsedHttpRequest* request, TCPSocket* socket) {
 
+#if 0
     printf("[Http]Request came in: %s %s\n", http_method_str(request->get_method()), request->get_url().c_str());
     
 	vector<string*>  headerFields = request->get_headers_fields();
@@ -91,6 +92,7 @@ void request_handler(ParsedHttpRequest* request, TCPSocket* socket) {
         printf("\n");
     }
     fflush(stdout);
+#endif
 
     if (request->get_method() == HTTP_GET && request->get_url() == "/") {
         HttpResponseBuilder builder(200);
@@ -108,7 +110,7 @@ void request_handler(ParsedHttpRequest* request, TCPSocket* socket) {
         builder.send(socket, response, sizeof(response) - 1);
     }
     else if (request->get_method() == HTTP_POST && request->get_url() == "/toggle") {
-        printf("toggle LED called\n\n");
+//        printf("toggle LED called\n\n");
         led = !led;
 
         HttpResponseBuilder builder(200);
