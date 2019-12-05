@@ -79,7 +79,7 @@ Thread msgSender(osPriorityNormal, DEFAULT_STACK_SIZE * 3);
 void request_handler(ParsedHttpRequest* request, TCPSocket* socket) {
 
     printf("[Http]Request came in: %s %s\n", http_method_str(request->get_method()), request->get_url().c_str());
-
+    
 	vector<string*>  headerFields = request->get_headers_fields();
 	vector<string*>  headerValues = request->get_headers_values();
     

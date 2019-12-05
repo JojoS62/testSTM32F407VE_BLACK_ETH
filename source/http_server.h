@@ -77,16 +77,9 @@ public:
 private:
     void main();
 
-    typedef struct {
-        ClientConnection* clientCon;
-        Thread*    thread;
-    } socket_thread_metadata_t;
-
     TCPSocket* server;
     NetworkInterface* _network;
     Thread _threadHTTPServer;
-    //vector<TCPSocket*> sockets;
-    vector<socket_thread_metadata_t*> socket_threads;
     Callback<void(ParsedHttpRequest* request, TCPSocket* socket)> handler;
 };
 

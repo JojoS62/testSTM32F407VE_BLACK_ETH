@@ -76,16 +76,11 @@ void ClientConnection::receive_data() {
  * @param[in] network The network interface
 */
 HttpServer::HttpServer(NetworkInterface* network)  :
-    _threadHTTPServer(osPriorityNormal, 1*1024, nullptr, "HTTPServerThread") { 
+    _threadHTTPServer(osPriorityNormal, 2*1024, nullptr, "HTTPServerThread") { 
     _network = network;
 }
 
 HttpServer::~HttpServer() {
-    for (size_t ix = 0; ix < HTTP_SERVER_MAX_CONCURRENT; ix++) {
-        if (socket_threads[ix]) {
-            delete socket_threads[ix];
-        }
-    }
 }
 
 /**
@@ -125,20 +120,6 @@ void HttpServer::main() {
             ClientConnection *clientCon = new ClientConnection(clt_sock, handler);
             clientCon->start();
         }
-#if 0
-            socket_thread_metadata_t* m = new socket_thread_metadata_t();
-            m->clientCon = clientCon;
-            socket_threads.push_back(m);
-        }
-
-        for (size_t ix = 0; ix < socket_threads.size(); ix++) {
-            if (socket_threads[ix]->thread->get_state() == Thread::Deleted) {
-                socket_threads[ix]->thread->terminate();
-                delete socket_threads[ix]->clientCon; 
-                socket_threads.erase(socket_threads.begin() + ix); // what if there are two?
-            }
-        }
-#endif
     }
 }
 
