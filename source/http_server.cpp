@@ -60,6 +60,7 @@ void ClientConnection::receive_data() {
     // close socket. Because allocated by accept(), it will be deleted by itself
     _socket->close();
 
+    // NOT WORKING, memory leak !
     _threadClientConnection.terminate();
     delete this;    // kill myself
 }
