@@ -29,10 +29,15 @@ ClientConnection::ClientConnection(TCPSocket* socket, Callback<void(ParsedHttpRe
 ClientConnection::~ClientConnection() {
     printf("deleting ClientConnection\n");
     fflush(stdout);
+    _handler = nullptr;
 };
 
 void ClientConnection::start() {
     _threadClientConnection.start(callback(this, &ClientConnection::receive_data));
+
+    _threadClientConnection.join();     // wait for thread to terminate
+
+    delete this;    // kill myself
 }
 
 void ClientConnection::receive_data() {
@@ -64,9 +69,6 @@ void ClientConnection::receive_data() {
 
     // close socket. Because allocated by accept(), it will be deleted by itself
     _socket->close();
-
-    // NOT WORKING, memory leak !
-    delete this;    // kill myself
 }
 
 
