@@ -1,0 +1,20 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "C_Cpp.addWorkspaceRootToIncludePath": false,
+    "files.associations": {
+        "*.cpp": "cpp",
+        "thread": "cpp",
+        "fonts.h": "c",
+        "array": "cpp",
+        "deque": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "initializer_list": "cpp",
+        "mstd_iterator": "cpp",
+        "*.tcc": "cpp",
+        "fstream": "cpp",
+        "xstring": "cpp"
+    }
+}
