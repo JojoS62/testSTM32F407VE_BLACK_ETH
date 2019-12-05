@@ -26,6 +26,11 @@ ClientConnection::ClientConnection(TCPSocket* socket, Callback<void(ParsedHttpRe
     _handler = handler; 
 };
 
+ClientConnection::~ClientConnection() {
+    printf("deleting ClientConnection\n");
+    fflush(stdout);
+};
+
 void ClientConnection::start() {
     _threadClientConnection.start(callback(this, &ClientConnection::receive_data));
 }
@@ -61,7 +66,6 @@ void ClientConnection::receive_data() {
     _socket->close();
 
     // NOT WORKING, memory leak !
-    _threadClientConnection.terminate();
     delete this;    // kill myself
 }
 

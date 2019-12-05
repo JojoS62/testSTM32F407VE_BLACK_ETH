@@ -108,7 +108,7 @@ void request_handler(ParsedHttpRequest* request, TCPSocket* socket) {
         builder.send(socket, response, sizeof(response) - 1);
     }
     else if (request->get_method() == HTTP_POST && request->get_url() == "/toggle") {
-        printf("toggle LED called\n");
+        printf("toggle LED called\n\n");
         led = !led;
 
         HttpResponseBuilder builder(200);

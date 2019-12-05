@@ -40,6 +40,7 @@ typedef HttpResponse ParsedHttpRequest;
 class ClientConnection {
 public:
     ClientConnection(TCPSocket* socket, Callback<void(ParsedHttpRequest* request, TCPSocket* socket)> handler);
+    ~ClientConnection();
 
     void start();
 
