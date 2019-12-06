@@ -20,30 +20,17 @@
  * SOFTWARE.
  */
 
-#include "threadWebSocketServer.h"
-
-#define STACKSIZE   (6 * 1024)
-#define THREADNAME  "WebSocketServer"
-
-
+#include "WebsocketHandlers.h"
 /*
     Websocket Test
 */
-
-class WSHandler: public WebSocketHandler
-{
-public:
-    virtual void onMessage(char* text);
-    virtual void onMessage(char* data, size_t size);
-    virtual void onOpen(WebSocketConnection *webSocketConnection);
-    virtual void onClose();
-};
 
 void WSHandler::onMessage(char* text)
 {
     printf("TEXT: [%s]\r\n", text);
     const char msg[] = "hello world\r\n";
-    _webSocketConnection->sendFrame(WSop_text, (uint8_t*)msg, sizeof(msg));
+    if (_clientConnection)
+        _clientConnection->sendFrame(WSop_text, (uint8_t*)msg, sizeof(msg));
 }
 
 void WSHandler::onMessage(char* data, size_t size)
@@ -54,9 +41,9 @@ void WSHandler::onMessage(char* data, size_t size)
     printf("[%d/%d]\r\n", lv, rv);
 }
 
-void WSHandler::onOpen(WebSocketConnection *webSocketConnection)
+void WSHandler::onOpen(ClientConnection *clientConnection)
 {
-    WebSocketHandler::onOpen(webSocketConnection);
+    WebSocketHandler::onOpen(clientConnection);
 
     printf("websocket opened\r\n");
 }
@@ -66,40 +53,3 @@ void WSHandler::onClose()
     printf("websocket closed\r\n");
 }
  
-
-ThreadWebSocketServer::ThreadWebSocketServer(NetworkInterface* network, int portNo) :
-    _thread(osPriorityNormal, STACKSIZE, nullptr, THREADNAME)
-{
-    _network = network;
-    _portNo = portNo;
-}
-
-/*
-    start() : starts the thread
-*/
-void ThreadWebSocketServer::start()
-{
-    _running = true;
-    _thread.start( callback(this, &ThreadWebSocketServer::myThreadFn) );
-}
-
-
-/*
-    start() : starts the thread
-*/
-void ThreadWebSocketServer::myThreadFn()
-{
-    // thread local objects
-    // take care of thread stacksize !
-
-    WebSocketServer ws_server;
-    WSHandler handler;
-
-    if (!ws_server.init(_network, _portNo)) {
-        printf("Failed to init server\r\n");
-    }
-
-    ws_server.setHandler("/ws/", &handler);
-    ws_server.run();
-}
-

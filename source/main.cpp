@@ -4,11 +4,11 @@
 #include "http_server.h"
 #include "http_response_builder.h"
 #include "network-helper.h"
+#include "WebsocketHandlers.h"
+
 //#include "TextLCD.h"
 #include "threadIO.h"
 #include "MQTTThreadedClient.h"
-
-#include "ThreadWebSocketServer.h"
 
 #define SAMPLE_TIME     1000 // milli-sec
 #define COMPLETED_FLAG (1UL << 0)
@@ -78,7 +78,7 @@ Thread msgSender(osPriorityNormal, DEFAULT_STACK_SIZE * 3);
 // Requests come in here
 void request_handler(ParsedHttpRequest* request, TCPSocket* socket) {
 
-#if 0
+#if 1
     printf("[Http]Request came in: %s %s\n", http_method_str(request->get_method()), request->get_url().c_str());
     
 	vector<string*>  headerFields = request->get_headers_fields();
@@ -183,7 +183,11 @@ int main() {
     //thread->start(print_stats);
 
 #ifdef USE_HTTPSERVER	
+    WSHandler wsHandler;
+
     HttpServer server(network);
+     server.setWSHandler("/ws/", &wsHandler);
+
     nsapi_error_t res = server.start(8080, &request_handler);
 
     if (res == NSAPI_ERROR_OK) {

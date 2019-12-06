@@ -20,29 +20,21 @@
  * SOFTWARE.
  */
 
-#ifndef __threadWebSocketServer_h__
-#define __threadWebSocketServer_h__
+#ifndef __WebsocketHandler_h__
+#define __WebsocketHandler_h__
 
 #include "mbed.h"
-#include "WebSocketServer.h"
-#include "WebSocketConnection.h"
+#include "http_server.h"
+#include "WebSocketHandler.h"
 
-class ThreadWebSocketServer
+class WSHandler: public WebSocketHandler
 {
-    public:
-    ThreadWebSocketServer(NetworkInterface* network, int portNo);
-
-    /*
-        start() : starts the thread
-    */
-    void start();
-
-    private:
-    void myThreadFn();
-    Thread  _thread;
-    bool _running;
-    NetworkInterface* _network;
-    int _portNo;
+public:
+    virtual void onMessage(char* text);
+    virtual void onMessage(char* data, size_t size);
+    virtual void onOpen(ClientConnection *clientConnection);
+    virtual void onClose();
 };
+
 
 #endif
