@@ -77,6 +77,14 @@ public:
         return method;
     }
 
+    void set_Upgrade(bool a_Upgrade) {
+        is_Upgrade = a_Upgrade;
+    }
+
+    bool get_Upgrade() {
+        return is_Upgrade;
+    }
+
     void set_header_field(string field) {
         concat_header_value = false;
 
@@ -220,6 +228,8 @@ private:
     bool is_chunked;
 
     bool is_message_completed;
+
+    bool is_Upgrade;
 
     char * body;
     uint32_t body_length;

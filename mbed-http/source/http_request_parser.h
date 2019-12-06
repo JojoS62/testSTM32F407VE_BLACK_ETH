@@ -96,6 +96,7 @@ private:
     int on_headers_complete(http_parser* parser) {
         response->set_headers_complete();
         response->set_method((http_method)parser->method);
+        response->set_Upgrade(parser->upgrade);
         return 0;
     }
 
