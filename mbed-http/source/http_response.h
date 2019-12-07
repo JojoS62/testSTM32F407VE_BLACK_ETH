@@ -26,6 +26,20 @@ using namespace std;
 class HttpResponse {
 public:
     HttpResponse() {
+        body = NULL;
+        clear();
+    }
+
+    ~HttpResponse() {
+        if (body != NULL) {
+            free(body);
+        }
+
+        header_fields.clear();
+        header_values.clear();
+    }
+
+    void clear() {
         status_code = 0;
         concat_header_field = false;
         concat_header_value = false;
@@ -34,18 +48,12 @@ public:
         is_message_completed = false;
         body_length = 0;
         body_offset = 0;
-        body = NULL;
-    }
-
-    ~HttpResponse() {
         if (body != NULL) {
             free(body);
+            body = NULL;
         }
-
-        for (uint32_t ix = 0; ix < header_fields.size(); ix++) {
-            delete header_fields[ix];
-            delete header_values[ix];
-        }
+        header_fields.clear();
+        header_values.clear();
     }
 
     void set_status(int a_status_code, string a_status_message) {

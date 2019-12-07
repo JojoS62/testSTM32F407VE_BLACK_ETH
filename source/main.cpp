@@ -65,7 +65,6 @@ void print_stats()
 }
 
 #define USE_HTTPSERVER
-//#define USE_WEBSOCKETSERVER
 //#define USE_MQTT
 
 #define DEFAULT_STACK_SIZE (4096)
@@ -183,10 +182,8 @@ int main() {
     //thread->start(print_stats);
 
 #ifdef USE_HTTPSERVER	
-    WSHandler wsHandler;
-
-    HttpServer server(network);
-     server.setWSHandler("/ws/", &wsHandler);
+    HttpServer server(network, 5, 4);
+    server.setWSHandler("/ws/", WSHandler::createHandler);
 
     nsapi_error_t res = server.start(8080, &request_handler);
 

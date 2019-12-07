@@ -30,6 +30,8 @@
 class WSHandler: public WebSocketHandler
 {
 public:
+    static WebSocketHandler* createHandler();
+    
     virtual void onMessage(char* text);
     virtual void onMessage(char* data, size_t size);
     virtual void onOpen(ClientConnection *clientConnection);

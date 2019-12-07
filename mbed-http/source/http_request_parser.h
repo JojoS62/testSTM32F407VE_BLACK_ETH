@@ -24,9 +24,11 @@
 class HttpParser {
 public:
 
-    HttpParser(HttpResponse* a_response, http_parser_type parser_type, Callback<void(const char *at, uint32_t length)> a_body_callback = 0)
+    HttpParser(HttpResponse* a_response, http_parser_type a_parser_type, Callback<void(const char *at, uint32_t length)> a_body_callback = 0)
         : response(a_response), body_callback(a_body_callback)
     {
+        parser_type = a_parser_type;
+
         settings = new http_parser_settings();
 
         settings->on_message_begin = &HttpParser::on_message_begin_callback;
@@ -42,7 +44,7 @@ public:
 
         // Construct the http_parser object
         parser = new http_parser();
-        http_parser_init(parser, parser_type);
+        http_parser_init(parser, a_parser_type);
         parser->data = (void*)this;
     }
 
@@ -53,6 +55,10 @@ public:
         if (settings) {
             delete settings;
         }
+    }
+
+    void clear() {
+        http_parser_init(parser, parser_type);
     }
 
     uint32_t execute(const char* buffer, uint32_t buffer_size) {
@@ -172,6 +178,7 @@ private:
     HttpResponse* response;
     Callback<void(const char *at, uint32_t length)> body_callback;
     http_parser* parser;
+    http_parser_type parser_type;
     http_parser_settings* settings;
 };
 

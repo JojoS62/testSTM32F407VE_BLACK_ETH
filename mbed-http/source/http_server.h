@@ -23,6 +23,8 @@
 #include "http_response.h"
 #include "http_response_builder.h"
 #include "WebSocketHandler.h"
+#include "ClientConnection.h"
+
 #include <string>
 #include <map>
 
@@ -41,89 +43,11 @@
 #define DEBUG_WEBSOCKETS(...) printf(__VA_ARGS__)
 #endif
 
-// max size of the WS Message Header
-#define WEBSOCKETS_MAX_HEADER_SIZE (14)
-
-typedef enum {
-    WSC_NOT_CONNECTED,
-    WSC_HEADER,
-    WSC_CONNECTED
-} WSclientsStatus_t;
-
-typedef enum {
-    WStype_ERROR,
-    WStype_DISCONNECTED,
-    WStype_CONNECTED,
-    WStype_TEXT,
-    WStype_BIN,
-    WStype_FRAGMENT_TEXT_START,
-    WStype_FRAGMENT_BIN_START,
-    WStype_FRAGMENT,
-    WStype_FRAGMENT_FIN,
-    WStype_PING,
-    WStype_PONG,
-} WStype_t;
-
-typedef enum {
-    WSop_continuation = 0x00,    ///< %x0 denotes a continuation frame
-    WSop_text         = 0x01,    ///< %x1 denotes a text frame
-    WSop_binary       = 0x02,    ///< %x2 denotes a binary frame
-                                 ///< %x3-7 are reserved for further non-control frames
-    WSop_close = 0x08,           ///< %x8 denotes a connection close
-    WSop_ping  = 0x09,           ///< %x9 denotes a ping
-    WSop_pong  = 0x0A            ///< %xA denotes a pong
-                                 ///< %xB-F are reserved for further control frames
-} WSopcode_t;
-
-typedef struct {
-    bool fin;
-    bool rsv1;
-    bool rsv2;
-    bool rsv3;
-
-    WSopcode_t opCode;
-    bool mask;
-
-    size_t payloadLen;
-
-    uint8_t * maskKey;
-} WSMessageHeader_t;
-
-
-
-
 typedef HttpResponse ParsedHttpRequest;
-class HttpServer;
 
-class ClientConnection {
-public:
-    ClientConnection(HttpServer* server, TCPSocket* socket, Callback<void(ParsedHttpRequest* request, TCPSocket* socket)> handler);
-    ~ClientConnection();
+typedef WebSocketHandler* (*CreateHandlerFn)();
+typedef std::map<std::string, CreateHandlerFn> WebSocketHandlerContainer;
 
-    void start();
-
-    // Websocket functions
-    uint8_t createHeader(uint8_t * buf, WSopcode_t opcode, size_t length, bool mask, uint8_t maskKey[4], bool fin);
-    bool sendFrameHeader(WSopcode_t opcode, size_t length = 0, bool fin = true);
-    bool sendFrame(WSopcode_t opcode, uint8_t * payload = NULL, size_t length = 0, bool fin = true, bool headerToPayload = false);
-
-private:
-    void receive_data();
-    bool handleWebSocket(int size);
-    char* base64Encode(const uint8_t* data, size_t size, char* outputBuffer, size_t outputBufferSize);
-    bool sendUpgradeResponse(const char* key);
-    HttpServer* _server;
-    TCPSocket* _socket;
-    Thread  _threadClientConnection;
-    ParsedHttpRequest _response;
-    HttpParser _parser;
-    bool _isWebSocket;
-    bool _mPrevFin;
-    bool _cIsClient;
-    uint8_t _recv_buffer[HTTP_RECEIVE_BUFFER_SIZE];
-    Callback<void(ParsedHttpRequest* request, TCPSocket* socket)> _handler;
-    WebSocketHandler* _webSocketHandler;
-};
 
 /**
  * \brief HttpServer implements the logic for setting up an HTTP server.
@@ -135,7 +59,7 @@ public:
      *
      * @param[in] network The network interface
     */
-    HttpServer(NetworkInterface* network);
+    HttpServer(NetworkInterface* network, int nWorkerThreads, int nWebSocketsMax);
 
     ~HttpServer();
 
@@ -144,16 +68,34 @@ public:
      */
     nsapi_error_t start(uint16_t port, Callback<void(ParsedHttpRequest* request, TCPSocket* socket)> a_handler);
 
-    void setWSHandler(const char* path, WebSocketHandler* handler);
-    WebSocketHandler* getWSHandler(const char* path);
+    void setWSHandler(const char* path, CreateHandlerFn handler);
+    CreateHandlerFn getWSHandler(const char* path);
+
+    bool isWebsocketAvailable() { return (_nWebSockets < _nWebSocketsMax); };
+    int getWebsocketCount() { return _nWebSockets; };
+    bool incWebsocketCount() { 
+        if (_nWebSockets < _nWebSocketsMax) {
+            _nWebSockets++;
+            return true;
+        } else
+        {
+            return false;
+        }
+    };
+    
+    void decWebsocketCount() { _nWebSockets--; };
     
 
 private:
     void main();
-    TCPSocket* server;
+    TCPSocket* _serverSocket;
     NetworkInterface* _network;
     Thread _threadHTTPServer;
-    Callback<void(ParsedHttpRequest* request, TCPSocket* socket)> handler;
+    int _nWorkerThreads;
+    int _nWebSockets;
+    int _nWebSocketsMax;
+    Callback<void(ParsedHttpRequest* request, TCPSocket* socket)> _handler;
+    vector<ClientConnection*> _clientConnections;
 
 #if 0
     void setHTTPHandler(const char* path, WebSocketHandler* handler);
@@ -163,7 +105,6 @@ private:
     WebSocketHandlerContainer _HTTPHandlers;
 #endif
 
-    typedef std::map<std::string, WebSocketHandler*> WebSocketHandlerContainer;
     WebSocketHandlerContainer _WSHandlers;
 };
 

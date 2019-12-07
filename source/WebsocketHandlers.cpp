@@ -52,4 +52,11 @@ void WSHandler::onClose()
 {
     printf("websocket closed\r\n");
 }
- 
+
+
+// WSHandler Factory
+WebSocketHandler* WSHandler::createHandler()
+{
+    WebSocketHandler* handler = new WSHandler();
+    return handler;
+}

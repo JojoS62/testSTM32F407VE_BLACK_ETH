@@ -1,5 +1,5 @@
-#ifndef _WEB_SOCKET_HANDLER_H_
-#define _WEB_SOCKET_HANDLER_H_
+#ifndef __WEB_SOCKET_HANDLER_H__
+#define __WEB_SOCKET_HANDLER_H__
 
 class ClientConnection;
 
@@ -18,5 +18,6 @@ public:
 protected:
     ClientConnection *_clientConnection;
 };
+
 
 #endif
